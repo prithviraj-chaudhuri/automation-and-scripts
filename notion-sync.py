@@ -59,12 +59,17 @@ def get_kanban_tasks():
     tasks = kanban_board["results"]
     return tasks, notion_client
 
+def validate_date(date):
+    if date is not None and len(date.split('T')) < 2:
+        date += 'T00:00:00.000-00:00'
+    return date
+
 def create_or_update_google_events(service, notion_client, tasks):
     for task in tasks:
         task_id = task["id"]
         event_name = task["properties"]["Name"]["title"][0]["text"]["content"]
-        event_start_date = task["properties"]["Due Date"]["date"]["start"]
-        event_end_date = task["properties"]["Due Date"]["date"]["end"]
+        event_start_date = validate_date(task["properties"]["Due Date"]["date"]["start"])
+        event_end_date = validate_date(task["properties"]["Due Date"]["date"]["end"])
         event_gcal_link = task["properties"]["Google Calendar Id"]["rich_text"]
 
         if event_end_date is None:

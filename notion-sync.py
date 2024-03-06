@@ -99,7 +99,7 @@ def create_or_update_google_events(service, notion_client, tasks):
             notion_client.pages.update(
                 task_id,
                 properties={
-                    "Google Calendar Link": {
+                    "Google Calendar Id": {
                         "rich_text": [{"type": "text", "text": {"content": event.get('id')}}]
                     }
                 },

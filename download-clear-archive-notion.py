@@ -19,15 +19,15 @@ def get_archived_notion_tasks():
     )
     tasks = archive_board["results"]
     print("Retrieved " + str(len(tasks)) + " archived tasks")
-    return tasks, notion_client
+    return tasks
     
 
 if __name__ == '__main__':
     dotenv.load_dotenv("config/.env")
     tasks = get_archived_notion_tasks()
     archive_location = os.getenv("ARCHIVE_LOCATION")
-    date_today = datetime.today().strftime('%Y-%m-%d')
-    filename = archive_location + '/' + date_today + '.json'
+    date_time = datetime.today().strftime('%Y-%m-%d-%H-%m')
+    filename = archive_location + '/' + date_time + '.json'
     with open(filename, 'w') as f:
         json.dump(tasks, f)
     

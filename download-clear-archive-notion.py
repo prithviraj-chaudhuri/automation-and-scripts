@@ -20,8 +20,6 @@ def get_archived_notion_tasks():
     tasks = archive_board["results"]
     print("Retrieved " + str(len(tasks)) + " archived tasks")
     return tasks, notion_client
-
-def delete_tasks(tasks, notion_client):
     
 
 if __name__ == '__main__':

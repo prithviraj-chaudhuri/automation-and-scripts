@@ -19,15 +19,24 @@ def get_archived_notion_tasks():
     )
     tasks = archive_board["results"]
     print("Retrieved " + str(len(tasks)) + " archived tasks")
-    return tasks
+    return tasks, notion_client
     
+def archive_tasks(tasks, notion_client):
+    for task in tasks:
+        notion_client.pages.update(
+            **{
+                "page_id": task['id'],
+                "archived": False
+            }
+        )
 
 if __name__ == '__main__':
     dotenv.load_dotenv("config/.env")
-    tasks = get_archived_notion_tasks()
+    tasks, notion_client = get_archived_notion_tasks()
     archive_location = os.getenv("ARCHIVE_LOCATION")
     date_time = datetime.today().strftime('%Y-%m-%d-%H-%M-%S')
     filename = archive_location + '/' + date_time + '.json'
     with open(filename, 'w') as f:
         json.dump(tasks, f)
-    
+    print("Trashing tasks")
+    archive_tasks(tasks, notion_client)

@@ -26,7 +26,7 @@ def archive_tasks(tasks, notion_client):
         notion_client.pages.update(
             **{
                 "page_id": task['id'],
-                "archived": False
+                "archived": True
             }
         )
 

@@ -13,8 +13,8 @@ import os.path
 def get_google_service():
     SCOPES = ["https://www.googleapis.com/auth/calendar"]
     creds = None
-    if os.path.exists("config/token.json"):
-        creds = Credentials.from_authorized_user_file("config/token.json", SCOPES)
+    if os.path.exists("config/token-calendar.json"):
+        creds = Credentials.from_authorized_user_file("config/token-calendar.json", SCOPES)
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
@@ -23,7 +23,7 @@ def get_google_service():
                 "config/credentials.json", SCOPES
             )
             creds = flow.run_local_server(port=0)
-            with open("config/token.json", "w") as token:
+            with open("config/token-calendar.json", "w") as token:
                 token.write(creds.to_json())
     try:
         service = build("calendar", "v3", credentials=creds)

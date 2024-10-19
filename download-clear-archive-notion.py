@@ -33,10 +33,13 @@ def archive_tasks(tasks, notion_client):
 if __name__ == '__main__':
     dotenv.load_dotenv("config/.env")
     tasks, notion_client = get_archived_notion_tasks()
-    archive_location = os.getenv("ARCHIVE_LOCATION")
-    date_time = datetime.today().strftime('%Y-%m-%d-%H-%M-%S')
-    filename = archive_location + '/' + date_time + '.json'
-    with open(filename, 'w') as f:
-        json.dump(tasks, f)
-    print("Trashing tasks")
-    archive_tasks(tasks, notion_client)
+    if len(tasks) > 0:
+        archive_location = os.getenv("ARCHIVE_LOCATION")
+        date_time = datetime.today().strftime('%Y-%m-%d-%H-%M-%S')
+        filename = archive_location + '/' + date_time + '.json'
+        with open(filename, 'w') as f:
+            json.dump(tasks, f)
+        print("Trashing tasks")
+        archive_tasks(tasks, notion_client)
+    else:
+        print("No tasks to archive")

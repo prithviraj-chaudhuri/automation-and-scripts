@@ -1,0 +1,29 @@
+{
+  "name": "Categorize-gmail",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "868d3f0b-f0f8-4fbc-98ec-244d1c40c572",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        720,
+        540
+      ],
+      "typeVersion": 1
+    }
+  ],
+  "pinData": {},
+  "connections": {},
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b150d46c-b127-4002-9fb7-9913572a06e9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c1d51593aac4c786a165cf91f1ece51e7f7d51917cd907d718a787ef8561802b"
+  },
+  "id": "dVOFn05FIPepmKWD",
+  "tags": []
+}

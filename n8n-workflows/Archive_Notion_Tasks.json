@@ -1,0 +1,243 @@
+{
+  "name": "Archive Notion Tasks",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "toJson",
+        "binaryPropertyName": "tasks",
+        "options": {}
+      },
+      "id": "e6097415-6c3f-4a0b-b875-8c9f06ba8555",
+      "name": "Convert to File",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        220,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "databaseId": {
+          "__rl": true,
+          "value": "cd87a30051d44c108934bc7071739ab3",
+          "mode": "id"
+        },
+        "returnAll": true,
+        "options": {}
+      },
+      "id": "fbf8ecf4-59dd-49a0-9652-badf96a6e97e",
+      "name": "Notion",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        -20,
+        560
+      ],
+      "credentials": {
+        "notionApi": {
+          "id": "6ZG3L0AyPWHfKTPO",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "=/saved_data/notion-archive/{{ $today.format('yyyy-MM-dd')}}.json",
+        "dataPropertyName": "tasks",
+        "options": {}
+      },
+      "id": "db4e7f4e-adef-4262-b00e-f4c594b7dafa",
+      "name": "Read/Write Files from Disk",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        420,
+        560
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {},
+      "id": "d9cc66c1-d652-417f-affb-b13d7372a0f2",
+      "name": "Replace Me",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        580,
+        900
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "f7b04d27-cd65-4d0f-9c8f-2f17dee4b96c",
+      "name": "Loop Over Items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        160,
+        880
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "archive",
+        "pageId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        }
+      },
+      "id": "0123e835-d5a9-4c69-ab28-41aeed333268",
+      "name": "Notion1",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        400,
+        900
+      ],
+      "credentials": {
+        "notionApi": {
+          "id": "6ZG3L0AyPWHfKTPO",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "id": "634dc8e2-d087-4ef4-b8ec-5f4e3ac21d42",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -360,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "command": "mkdir /saved_data/notion-archive"
+      },
+      "id": "d86bcdd4-351b-41b4-a645-38d203fb54bb",
+      "name": "Execute Command",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -180,
+        560
+      ],
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notion": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Replace Me": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Notion1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notion1": {
+      "main": [
+        [
+          {
+            "node": "Replace Me",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Execute Command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command": {
+      "main": [
+        [
+          {
+            "node": "Notion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": false,
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": -1
+  },
+  "versionId": "887005fc-2d67-44d7-a219-3ab6fb6915dd",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c1d51593aac4c786a165cf91f1ece51e7f7d51917cd907d718a787ef8561802b"
+  },
+  "id": "1OQyrVxHQrNmuPLk",
+  "tags": []
+}

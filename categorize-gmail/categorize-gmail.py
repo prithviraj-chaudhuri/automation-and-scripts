@@ -70,7 +70,7 @@ def get_langroid_agent(host, model, context_length):
     return agent
 
 if __name__ == '__main__':
-    dotenv.load_dotenv("config/.env")
+    dotenv.load_dotenv("../config/.env")
     service = get_google_service()
     emails = get_unread_emails(service)
     print(emails)

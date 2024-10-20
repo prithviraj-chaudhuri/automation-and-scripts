@@ -115,7 +115,7 @@ def create_or_update_google_events(service, notion_client, tasks):
             event = service.events().update(calendarId='primary', eventId=event_id, body=event_body).execute()
 
 if __name__ == '__main__':
-    dotenv.load_dotenv("config/.env")
+    dotenv.load_dotenv("../config/.env")
     tasks, notion_client = get_kanban_tasks()
     service = get_google_service()
     create_or_update_google_events(service, notion_client, tasks)

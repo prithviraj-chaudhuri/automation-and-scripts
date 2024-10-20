@@ -31,7 +31,7 @@ def archive_tasks(tasks, notion_client):
         )
 
 if __name__ == '__main__':
-    dotenv.load_dotenv("config/.env")
+    dotenv.load_dotenv("../config/.env")
     tasks, notion_client = get_archived_notion_tasks()
     if len(tasks) > 0:
         archive_location = os.getenv("ARCHIVE_LOCATION")

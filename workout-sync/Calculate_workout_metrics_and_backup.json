@@ -1,5 +1,5 @@
 {
-  "name": "Calculate workout metrics",
+  "name": "Calculate workout metrics and backup",
   "nodes": [
     {
       "parameters": {
@@ -12,7 +12,15 @@
         "title": "={{ $now.format('yyyy-MM-dd') }}",
         "propertiesUi": {
           "propertyValues": [
-            {}
+            {
+              "key": "Date|date",
+              "date": "={{ $now.format('yyyy-MM-dd') }}",
+              "timezone": "America/New_York"
+            },
+            {
+              "key": "Workout volume|number",
+              "numberValue": "={{ $json.workoutVolume }}"
+            }
           ]
         },
         "options": {}
@@ -104,6 +112,62 @@
         340,
         500
       ]
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "databaseId": {
+          "__rl": true,
+          "value": "128f621e1ff4809abd96ef3a63a849fb",
+          "mode": "id"
+        },
+        "returnAll": true,
+        "options": {}
+      },
+      "id": "d6ea6800-66fa-452e-bb60-66aaa2f34419",
+      "name": "Get All workout logs",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        1200,
+        500
+      ],
+      "credentials": {
+        "notionApi": {
+          "id": "6ZG3L0AyPWHfKTPO",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "toJson",
+        "options": {}
+      },
+      "id": "3c276567-d75f-405d-a064-212e1de63d5c",
+      "name": "Convert to File",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        340,
+        740
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "/saved_data/notion-archive/workout-data.json",
+        "options": {}
+      },
+      "id": "a476a175-938c-4042-a557-18a7feae2fba",
+      "name": "Read/Write Files from Disk",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        560,
+        740
+      ]
     }
   ],
   "pinData": {},
@@ -140,13 +204,46 @@
           }
         ]
       ]
+    },
+    "Save Workout Volume": {
+      "main": [
+        [
+          {
+            "node": "Get All workout logs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get All workout logs": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "939270b0-085e-449c-b572-c29a56d2d311",
+  "versionId": "3e0e1fae-4e47-47b7-905a-6779a2b98e8c",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "c1d51593aac4c786a165cf91f1ece51e7f7d51917cd907d718a787ef8561802b"

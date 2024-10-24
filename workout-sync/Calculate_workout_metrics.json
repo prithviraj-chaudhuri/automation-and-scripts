@@ -1,0 +1,156 @@
+{
+  "name": "Calculate workout metrics",
+  "nodes": [
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "databaseId": {
+          "__rl": true,
+          "value": "129f621e1ff48070a7c0dbe20d4087a9",
+          "mode": "id"
+        },
+        "title": "={{ $now.format('yyyy-MM-dd') }}",
+        "propertiesUi": {
+          "propertyValues": [
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "id": "b6853adb-a890-4980-a885-72e79500c1b1",
+      "name": "Save Workout Volume",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        980,
+        500
+      ],
+      "credentials": {
+        "notionApi": {
+          "id": "6ZG3L0AyPWHfKTPO",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "databaseId": {
+          "__rl": true,
+          "value": "128f621e1ff4809abd96ef3a63a849fb",
+          "mode": "id"
+        },
+        "returnAll": true,
+        "filterType": "manual",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "key": "Date|date",
+              "condition": "after",
+              "date": "={{ $now.minus(1, \"days\").format('yyyy-MM-dd') }}"
+            },
+            {
+              "key": "Date|date",
+              "condition": "before",
+              "date": "={{ $now.plus(1, \"days\").format('yyyy-MM-dd') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "31cfc162-7558-4ce4-8328-3db307766244",
+      "name": "Get Workout Data today",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        560,
+        500
+      ],
+      "credentials": {
+        "notionApi": {
+          "id": "6ZG3L0AyPWHfKTPO",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nlet workoutVolume = 0;\nfor (const item of $input.all()) {\n  if (item.json.property_calories_burned == 0) {\n    let weight = item.json.property_weight;\n    if (weight == 0) {\n      weight = 1;\n    }\n    workoutVolume += weight * item.json.property_reps;\n  }\n}\n\nreturn  { 'json' : { workoutVolume: workoutVolume } };;"
+      },
+      "id": "b7bfe344-bb71-42d4-8658-a59531968fd1",
+      "name": "Calculate Workout volume",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        780,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "id": "80d697df-038d-4b7e-8669-ecf428cc403c",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        340,
+        500
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get Workout Data today": {
+      "main": [
+        [
+          {
+            "node": "Calculate Workout volume",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Workout volume": {
+      "main": [
+        [
+          {
+            "node": "Save Workout Volume",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Workout Data today",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "939270b0-085e-449c-b572-c29a56d2d311",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c1d51593aac4c786a165cf91f1ece51e7f7d51917cd907d718a787ef8561802b"
+  },
+  "id": "1OvzknTdaJV7HLo1",
+  "tags": []
+}

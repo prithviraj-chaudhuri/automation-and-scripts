@@ -30,8 +30,8 @@
       "type": "n8n-nodes-base.notion",
       "typeVersion": 2.2,
       "position": [
-        980,
-        500
+        960,
+        660
       ],
       "credentials": {
         "notionApi": {
@@ -39,6 +39,163 @@
           "name": "Notion account"
         }
       }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nlet workoutVolume = 0;\nfor (const item of $input.all()) {\n  if (item.json.property_calories_burned == 0) {\n    let weight = item.json.property_weight;\n    if (weight == 0) {\n      weight = 1;\n    }\n    workoutVolume += weight * item.json.property_reps;\n  }\n}\n\nreturn  { 'json' : { workoutVolume: workoutVolume } };;"
+      },
+      "id": "b7bfe344-bb71-42d4-8658-a59531968fd1",
+      "name": "Calculate Workout volume",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        760,
+        660
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "id": "80d697df-038d-4b7e-8669-ecf428cc403c",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        320,
+        660
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "toJson",
+        "options": {}
+      },
+      "id": "3c276567-d75f-405d-a064-212e1de63d5c",
+      "name": "Convert to File",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        320,
+        900
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "/saved_data/notion-archive/workout-data.json",
+        "options": {}
+      },
+      "id": "a476a175-938c-4042-a557-18a7feae2fba",
+      "name": "Read/Write Files from Disk",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        540,
+        900
+      ]
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "notion-workout-metrics",
+          "mode": "list",
+          "cachedResultName": "notion-workout-metrics"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "WORKOUT_VOLUME": "={{ $json.property_workout_volume }}",
+            "DATE": "={{ $json.name }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "DATE",
+              "displayName": "DATE",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "WORKOUT_VOLUME",
+              "displayName": "WORKOUT_VOLUME",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e1b03fb6-44f1-4945-a808-26f78d54df47",
+      "name": "Postgres",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        1180,
+        460
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "q9eJZOIHBcW4hOHd",
+          "name": "Postgres account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "databaseId": {
+          "__rl": true,
+          "value": "128f621e1ff4809abd96ef3a63a849fb",
+          "mode": "id"
+        },
+        "returnAll": true,
+        "options": {}
+      },
+      "id": "d6ea6800-66fa-452e-bb60-66aaa2f34419",
+      "name": "Get All workout logs",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        1180,
+        660
+      ],
+      "credentials": {
+        "notionApi": {
+          "id": "6ZG3L0AyPWHfKTPO",
+          "name": "Notion account"
+        }
+      },
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -73,8 +230,8 @@
       "type": "n8n-nodes-base.notion",
       "typeVersion": 2.2,
       "position": [
-        560,
-        500
+        540,
+        660
       ],
       "credentials": {
         "notionApi": {
@@ -82,107 +239,10 @@
           "name": "Notion account"
         }
       }
-    },
-    {
-      "parameters": {
-        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nlet workoutVolume = 0;\nfor (const item of $input.all()) {\n  if (item.json.property_calories_burned == 0) {\n    let weight = item.json.property_weight;\n    if (weight == 0) {\n      weight = 1;\n    }\n    workoutVolume += weight * item.json.property_reps;\n  }\n}\n\nreturn  { 'json' : { workoutVolume: workoutVolume } };;"
-      },
-      "id": "b7bfe344-bb71-42d4-8658-a59531968fd1",
-      "name": "Calculate Workout volume",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        780,
-        500
-      ]
-    },
-    {
-      "parameters": {
-        "rule": {
-          "interval": [
-            {}
-          ]
-        }
-      },
-      "id": "80d697df-038d-4b7e-8669-ecf428cc403c",
-      "name": "Schedule Trigger",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
-      "position": [
-        340,
-        500
-      ]
-    },
-    {
-      "parameters": {
-        "resource": "databasePage",
-        "operation": "getAll",
-        "databaseId": {
-          "__rl": true,
-          "value": "128f621e1ff4809abd96ef3a63a849fb",
-          "mode": "id"
-        },
-        "returnAll": true,
-        "options": {}
-      },
-      "id": "d6ea6800-66fa-452e-bb60-66aaa2f34419",
-      "name": "Get All workout logs",
-      "type": "n8n-nodes-base.notion",
-      "typeVersion": 2.2,
-      "position": [
-        1200,
-        500
-      ],
-      "credentials": {
-        "notionApi": {
-          "id": "6ZG3L0AyPWHfKTPO",
-          "name": "Notion account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "operation": "toJson",
-        "options": {}
-      },
-      "id": "3c276567-d75f-405d-a064-212e1de63d5c",
-      "name": "Convert to File",
-      "type": "n8n-nodes-base.convertToFile",
-      "typeVersion": 1.1,
-      "position": [
-        340,
-        740
-      ]
-    },
-    {
-      "parameters": {
-        "operation": "write",
-        "fileName": "/saved_data/notion-archive/workout-data.json",
-        "options": {}
-      },
-      "id": "a476a175-938c-4042-a557-18a7feae2fba",
-      "name": "Read/Write Files from Disk",
-      "type": "n8n-nodes-base.readWriteFile",
-      "typeVersion": 1,
-      "position": [
-        560,
-        740
-      ]
     }
   ],
   "pinData": {},
   "connections": {
-    "Get Workout Data today": {
-      "main": [
-        [
-          {
-            "node": "Calculate Workout volume",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Calculate Workout volume": {
       "main": [
         [
@@ -212,15 +272,9 @@
             "node": "Get All workout logs",
             "type": "main",
             "index": 0
-          }
-        ]
-      ]
-    },
-    "Get All workout logs": {
-      "main": [
-        [
+          },
           {
-            "node": "Convert to File",
+            "node": "Postgres",
             "type": "main",
             "index": 0
           }
@@ -237,13 +291,35 @@
           }
         ]
       ]
+    },
+    "Get All workout logs": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Workout Data today": {
+      "main": [
+        [
+          {
+            "node": "Calculate Workout volume",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "3e0e1fae-4e47-47b7-905a-6779a2b98e8c",
+  "versionId": "1c8938e5-79ca-4135-b5ce-6057839eb93d",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "c1d51593aac4c786a165cf91f1ece51e7f7d51917cd907d718a787ef8561802b"

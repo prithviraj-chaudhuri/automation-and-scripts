@@ -9,6 +9,7 @@ import os
 import base64
 import argparse
 import datetime
+import json
 
 
 def get_google_service(config_path):
@@ -42,6 +43,7 @@ def list_messages(service, user_id='me', after_date=None, before_date=None, page
     if before_date:
         query += f'before:{before_date}'
 
+    first_page_token = None
     messages = []
     try:
         if not next_page_token:
@@ -51,6 +53,7 @@ def list_messages(service, user_id='me', after_date=None, before_date=None, page
             print(next_page_token)
             response = service.users().messages().list(userId=user_id, q=query.strip()).execute()
             messages = response.get('messages', [])
+        first_page_token = next_page_token
 
         page_count = 1
         next_page_token = None
@@ -64,11 +67,45 @@ def list_messages(service, user_id='me', after_date=None, before_date=None, page
             page_count += 1
         
         print(f"Retrieved message count: {len(messages)}")
-        return messages, next_page_token
+        return messages, first_page_token, next_page_token
     
     except HttpError as error:
         print(f"An error occurred: {error}")
         return [], None
+
+def update_status(data, next_page_token, next_message_id):
+    print("Saving status")
+    stats = {
+        "next_page": next_page_token,
+        "next_message": next_message_id
+    }
+    with open(data+"/status.json", "w") as outfile:
+        json.dump(stats, outfile)
+
+
+def get_messages(service, data_path, first_page_token=None, current_message_id=None, update_status_count=100):
+    begin = False
+    emails = []
+    count = 0
+
+    print("Processing Messages")
+    for message in messages:
+        if current_message_id and message['id'] == current_message_id:
+            begin = True
+        elif not current_message_id:
+            begin = True
+        if not begin:
+            continue
+        current_message_id = message['id']
+        print(current_message_id)
+        email_data = get_message(service, 'me', message['id'])
+        emails.append(email_data)
+        count += 1
+        if count == update_status_count:
+            update_status(data_path, first_page_token, current_message_id)
+            count = 0
+
+    return emails, current_message_id
 
 def get_message(service, user_id, msg_id):
     try:
@@ -101,24 +138,6 @@ def get_message(service, user_id, msg_id):
         print(f"An error occurred: {error}")
         return None
 
-def get_messages(service, current_message_id):
-    begin = False
-    emails = []
-
-    print("Processing Messages")
-    for message in messages:
-        if current_message_id and message['id'] == current_message_id:
-            begin = True
-        elif not current_message_id:
-            begin = True
-        if not begin:
-            continue
-        current_message_id = message['id']
-        print(current_message_id)
-        email_data = get_message(service, 'me', message['id'])
-        emails.append(email_data)
-    return emails, current_message_id
-
 if __name__ == '__main__':
     dotenv.load_dotenv("../config/.env")
 
@@ -127,6 +146,7 @@ if __name__ == '__main__':
     parser.add_argument("--data", help="Path to the store the exported files")
     parser.add_argument("--pages_to_process", help="Number of pages to process")
     parser.add_argument("--page_token", help="Page token to start processing from")
+    parser.add_argument("--update_status_count", help="Save the current status after processing these many messages")
     parser.add_argument("--message_id", help="Page token to start processing from")
     parser.add_argument("--start_date", help="The date from which to pull messages")
     parser.add_argument("--end_date", help="The date till which to pull messages")
@@ -134,10 +154,25 @@ if __name__ == '__main__':
 
     service = get_google_service(args.config)
 
+    status = None
+    with open(args.data + '/status.json') as f:
+        status = json.load(f)
+
+    first_page_token = None
+    next_message_id = None
+    if status:
+        first_page_token = status['next_page']
+        next_message_id = status['next_message']
+    else:
+        first_page_token = args.page_token
+        next_message_id = args.message_id
+
     after_date = int(datetime.datetime.strptime(args.start_date, '%Y-%m-%d').timestamp())
     before_date = int(datetime.datetime.strptime(args.end_date, '%Y-%m-%d').timestamp())
-    messages, next_page_token = list_messages(service, 'me', after_date, before_date, int(args.pages_to_process), args.page_token)
-    emails, next_message_id = get_messages(service, args.message_id)
+    messages, first_page_token, next_page_token = list_messages(service, 'me', after_date, before_date, int(args.pages_to_process), first_page_token)
+    emails, next_message_id = get_messages(service, args.data, first_page_token, next_message_id, int(args.update_status_count))
+
+    update_status(args.data, next_page_token, None)
         
     print(f"Next Page Token {next_page_token}")
     print(f"Next message ID {next_message_id}")

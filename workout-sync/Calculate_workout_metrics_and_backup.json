@@ -41,7 +41,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nlet workoutVolume = 0;\n\nif ($input.all().length == 1 && Object.keys($input.all()[0].json).length == 0) {\n  date = $today.minus({days: 1}).toLocaleString();\n} else {\n  date = $input.first().json.property_date.start;\n}\n\nfor (const item of $input.all()) {\n  if (item.json.property_calories_burned == 0) {\n    let weight = item.json.property_weight;\n    if (weight == 0) {\n      weight = 1;\n    }\n    workoutVolume += weight * item.json.property_reps;\n  }\n}\n\nreturn  { 'json' : { workoutVolume: workoutVolume, date: date} };"
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nlet workoutVolume = 0;\n\nif ($input.all().length == 1 && Object.keys($input.all()[0].json).length == 0) {\n  date = $today.minus({days: 1}).toString().split('T')[0];\n} else {\n  date = $input.first().json.property_date.start;\n}\n\nfor (const item of $input.all()) {\n  if (item.json.property_calories_burned == 0) {\n    let weight = item.json.property_weight;\n    if (weight == 0) {\n      weight = 1;\n    }\n    workoutVolume += weight * item.json.property_reps;\n  }\n}\n\nreturn  { 'json' : { workoutVolume: workoutVolume, date: date} };"
       },
       "id": "b7bfe344-bb71-42d4-8658-a59531968fd1",
       "name": "Calculate Workout volume",
@@ -319,7 +319,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "eed00001-cc06-4f16-b598-e3e413bc4cee",
+  "versionId": "f45b55f7-b5df-4e83-b9ab-abf5b5c758cf",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "c1d51593aac4c786a165cf91f1ece51e7f7d51917cd907d718a787ef8561802b"

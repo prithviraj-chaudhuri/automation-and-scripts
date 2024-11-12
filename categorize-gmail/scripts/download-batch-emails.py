@@ -195,9 +195,11 @@ if __name__ == '__main__':
     messages, first_page_token, next_page_token = list_messages(service, 'me', after_date, before_date, int(args.pages_to_process), first_page_token)
     emails, next_message_id = get_messages(service, args.data, first_page_token, next_message_id, int(args.update_status_count), file_count)
 
-    if len(emails) > 0:
-        update_status(args.data, next_page_token, None, file_count + 1)
+    if len(emails) > 1:
+        update_status(args.data, next_page_token, None, file_count+1)
         write_csv(emails, args.data, file_count)
+    else:
+        update_status(args.data, next_page_token, None, file_count)
         
     print(f"Next Page Token {next_page_token}")
     print(f"Next message ID {next_message_id}")

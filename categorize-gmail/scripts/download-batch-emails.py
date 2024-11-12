@@ -4,14 +4,12 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-import dotenv
 import os
 import base64
 import argparse
 import datetime
 import json
 import csv
-
 
 def get_google_service(config_path):
     SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
@@ -153,14 +151,14 @@ def get_message(service, user_id, msg_id):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", help="Path to the config files", required=True)
-    parser.add_argument("--data", help="Path to the store the exported files", required=True)
-    parser.add_argument("--pages_to_process", help="Number of pages to process", required=True)
-    parser.add_argument("--update_status_count", help="Save the current status after processing these many messages", required=True)
-    parser.add_argument("--start_date", help="The date from which to pull messages (yyyy-mm-dd)", required=True)
-    parser.add_argument("--end_date", help="The date till which to pull messages (yyyy-mm-dd)", required=True)
-    parser.add_argument("--page_token", help="Page token to start processing from")
-    parser.add_argument("--message_id", help="Page token to start processing from")
+    parser.add_argument("--config", help="Path to the config files", default=os.environ.get('CONFIG'), required=True)
+    parser.add_argument("--data", help="Path to the store the exported files", default=os.environ.get('DATA'), required=True)
+    parser.add_argument("--pages_to_process", help="Number of pages to process", default=os.environ.get('PAGES_TO_PROCESS'), required=True)
+    parser.add_argument("--update_status_count", help="Save the current status after processing these many messages", default=os.environ.get('UPDATE_STATUS_COUNT'), required=True)
+    parser.add_argument("--start_date", help="The date from which to pull messages (yyyy-mm-dd)", default=os.environ.get('START_DATE'), required=True)
+    parser.add_argument("--end_date", help="The date till which to pull messages (yyyy-mm-dd)",default=os.environ.get('END_DATE'), required=True)
+    parser.add_argument("--page_token", help="Page token to start processing from", default=os.environ.get('PAGE_TOKEN'))
+    parser.add_argument("--message_id", help="Page token to start processing from", default=os.environ.get('MESSAGE_ID'))
     args = parser.parse_args()
 
     service = get_google_service(args.config)

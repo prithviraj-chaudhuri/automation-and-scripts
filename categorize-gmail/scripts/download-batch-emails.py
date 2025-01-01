@@ -172,7 +172,6 @@ if __name__ == '__main__':
     parser.add_argument("--config", help="Path to the config files", default=os.environ.get('CONFIG'))
     parser.add_argument("--data", help="Path to the store the exported files", default=os.environ.get('DATA'))
     parser.add_argument("--pages_to_process", help="Number of pages to process", default=os.environ.get('PAGES_TO_PROCESS'))
-    parser.add_argument("--update_status_count", help="Save the current status after processing these many messages", default=os.environ.get('UPDATE_STATUS_COUNT'))
     parser.add_argument("--start_date", help="The date from which to pull messages (yyyy-mm-dd)", default=os.environ.get('START_DATE'))
     parser.add_argument("--end_date", help="The date till which to pull messages (yyyy-mm-dd)", default=os.environ.get('END_DATE'))
     parser.add_argument("--page_token", help="Page token to start processing from", default=os.environ.get('PAGE_TOKEN'))

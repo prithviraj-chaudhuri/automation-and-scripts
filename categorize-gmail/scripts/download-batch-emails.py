@@ -20,24 +20,25 @@ class Instance:
         try:
             with open(self.status_file) as f:
                 self.status = json.load(f)
-                return self.status.is_completed
+                return not self.status["is_complete"]
         except:
             return False
 
     def start_instance(self):
-        self.status = {
-            "next_page": '',
-            "next_message": '',
-            "file": 1,
-            "is_complete": False
-        }
+        if not self.status:
+            self.status = {
+                "next_page": '',
+                "file": 1,
+                "is_complete": False
+            }
+        else:
+            self.status["is_complete"] = False
         with open(self.status_file,'w') as outfile:
             json.dump(self.status, outfile)
 
-    def update_instance(self, next_page_token, next_message_id, file_count, is_complete):
+    def update_instance(self, next_page_token, file_count, is_complete):
         self.status = {
             "next_page": next_page_token,
-            "next_message": next_message_id,
             "file": file_count,
             "is_complete": is_complete
         }
@@ -86,13 +87,13 @@ class Google:
         first_page_token = None
         messages = []
         try:
+            response = None
             if next_page_token:
                 print(next_page_token)
                 response = self.service.users().messages().list(userId=user_id, q=query.strip(), pageToken=next_page_token).execute()
-                messages = self.service.get('messages', [])
             else:
                 response = self.service.users().messages().list(userId=user_id, q=query.strip()).execute()
-                messages = response.get('messages', [])
+            messages = response.get('messages', [])
             first_page_token = next_page_token
 
             page_count = 1
@@ -113,29 +114,17 @@ class Google:
             print(f"An error occurred: {error}")
             return [], None
         
-    def get_messages(self, messages, data_path, first_page_token=None, current_message_id=None, update_status_count=100, file_count=1):
-        begin = False
+    def get_messages(self, messages):
         emails = []
-        count = 0
 
         print("Processing Messages")
         for message in messages:
-            if current_message_id and message['id'] == current_message_id:
-                begin = True
-            elif not current_message_id:
-                begin = True
-            if not begin:
-                continue
             current_message_id = message['id']
             print(current_message_id)
             email_data = self.get_message('me', message['id'])
             emails.append(email_data)
-            count += 1
-            if count == update_status_count:
-                self.instance.update_instance(data_path, first_page_token, current_message_id, file_count)
-                count = 0
 
-        return emails, current_message_id
+        return emails
     
     def get_message(self, user_id, msg_id):
         try:
@@ -187,30 +176,26 @@ if __name__ == '__main__':
     parser.add_argument("--start_date", help="The date from which to pull messages (yyyy-mm-dd)", default=os.environ.get('START_DATE'))
     parser.add_argument("--end_date", help="The date till which to pull messages (yyyy-mm-dd)", default=os.environ.get('END_DATE'))
     parser.add_argument("--page_token", help="Page token to start processing from", default=os.environ.get('PAGE_TOKEN'))
-    parser.add_argument("--message_id", help="Page token to start processing from", default=os.environ.get('MESSAGE_ID'))
     args = parser.parse_args()
 
     instance = Instance(args.data, args.start_date, args.end_date)
     if not instance.is_instance_started():
         instance.start_instance()
     else:
-        print("Process already runs for dates between ", args.start_date, " ", args.end_date)
+        print("Process already running for dates between ", args.start_date, " ", args.end_date)
         exit
 
     google  = Google(args.config, instance)
     google.get_google_service()
     
     first_page_token = None
-    next_message_id = None
 
     file_count = 1
     if instance.status:
         first_page_token = instance.status['next_page']
-        next_message_id = instance.status['next_message']
         file_count = int(instance.status['file'])
     else:
         first_page_token = args.page_token
-        next_message_id = args.message_id
 
     if args.start_date:
         after_date = int(datetime.datetime.strptime(args.start_date, '%Y-%m-%d').timestamp())
@@ -223,13 +208,10 @@ if __name__ == '__main__':
         before_date = None
 
     messages, first_page_token, next_page_token = google.list_messages('me', after_date, before_date, int(args.pages_to_process), first_page_token)
-    emails, next_message_id = google.get_messages(messages, args.data, first_page_token, next_message_id, int(args.update_status_count), file_count)
+    emails = google.get_messages(messages)
 
     if len(emails) > 1:
-        instance.update_instance(args.data, next_page_token, None, file_count+1)
+        instance.update_instance(next_page_token, file_count+1, True)
         write_csv(emails, args.data, file_count)
-    else:
-        instance.update_instance(args.data, next_page_token, None, file_count)
         
     print(f"Next Page Token {next_page_token}")
-    print(f"Next message ID {next_message_id}")

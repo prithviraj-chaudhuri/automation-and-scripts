@@ -212,5 +212,7 @@ if __name__ == '__main__':
     if len(emails) > 1:
         instance.update_instance(next_page_token, file_count+1, True)
         write_csv(emails, args.data, file_count)
+    else:
+        print("NO_EMAILS")
         
     print(f"Next Page Token {next_page_token}")

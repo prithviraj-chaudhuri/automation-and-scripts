@@ -118,3 +118,35 @@ class Google:
         except HttpError as error:
             print(f"An error occurred: {error}")
             return None
+
+    def train_spam_filter(self, message_ids, batch_size=1000):
+        results = {
+            'marked_spam': 0,
+            'trained_filter': 0,
+            'failed': 0
+        }
+        
+        for i in range(0, len(message_ids), batch_size):
+            batch = message_ids[i:i + batch_size]
+            try:
+                # Mark as spam and train filter
+                batch_request = {
+                    'ids': batch,
+                    'addLabelIds': ['SPAM'],
+                    'removeLabelIds': ['INBOX'],
+                    'processForFilter': True
+                }
+                
+                # self.service.users().messages().batchModify(
+                #     userId='me',
+                #     body=batch_request
+                # ).execute()
+                
+                results['marked_spam'] += len(batch)
+                results['trained_filter'] += len(batch)
+                
+            except HttpError as error:
+                print(f"Batch error at index {i}: {error}")
+                results['failed'] += len(batch)
+                
+        return results

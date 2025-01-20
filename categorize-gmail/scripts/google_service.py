@@ -8,7 +8,7 @@ import base64
 import os
 
 class Google:
-    def __init__(self, config_path, instance):
+    def __init__(self, config_path, instance=None):
         self.config_path = config_path
         self.SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
         self.service = None
@@ -150,3 +150,9 @@ class Google:
                 results['failed'] += len(batch)
                 
         return results
+
+
+    def get_spam_emails(self, user_id='me'):
+        query = 'is:spam'
+        messages, _, _ = self.list_messages(user_id, query)
+        return messages

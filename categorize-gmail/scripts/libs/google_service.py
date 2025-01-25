@@ -10,7 +10,10 @@ import os
 class Google:
     def __init__(self, config_path, instance=None):
         self.config_path = config_path
-        self.SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
+        self.SCOPES = [
+            "https://www.googleapis.com/auth/gmail.readonly",
+            "https://www.googleapis.com/auth/gmail.modify"
+        ]
         self.service = None
         self.instance = instance
 
@@ -130,6 +133,8 @@ class Google:
         
         for i in range(0, len(message_ids), batch_size):
             batch = message_ids[i:i + batch_size]
+            print(f"Processing batch {i} to {i + batch_size}")
+            print(batch)
             try:
                 # Mark as spam and train filter
                 batch_request = {
@@ -139,10 +144,10 @@ class Google:
                     'processForFilter': True
                 }
                 
-                # self.service.users().messages().batchModify(
-                #     userId='me',
-                #     body=batch_request
-                # ).execute()
+                self.service.users().messages().batchModify(
+                    userId='me',
+                    body=batch_request
+                ).execute()
                 
                 results['marked_spam'] += len(batch)
                 results['trained_filter'] += len(batch)

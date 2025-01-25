@@ -8,6 +8,10 @@ from google_service import Google
 
 class Instance:
     def __init__(self, data, start_date, end_date):
+        if not start_date:
+            start_date = 'start'
+        if not end_date:
+            end_date = 'end'
         self.status_file = data + '/status--'+start_date+'--'+end_date+'.json'
         self.status = None
 
@@ -58,6 +62,7 @@ if __name__ == '__main__':
     parser.add_argument("--start_date", help="The date from which to pull messages (yyyy-mm-dd)", default=os.environ.get('START_DATE'))
     parser.add_argument("--end_date", help="The date till which to pull messages (yyyy-mm-dd)", default=os.environ.get('END_DATE'))
     parser.add_argument("--page_token", help="Page token to start processing from", default=os.environ.get('PAGE_TOKEN'))
+    parser.add_argument("--spam", help="Process spam", default=os.environ.get('SPAM'))
     args = parser.parse_args()
 
     instance = Instance(args.data, args.start_date, args.end_date)
@@ -82,14 +87,19 @@ if __name__ == '__main__':
     if args.start_date:
         after_date = int(datetime.datetime.strptime(args.start_date, '%Y-%m-%d').timestamp())
     else:
-        after_date = None
+        after_date = ''
 
     if args.end_date:
         before_date = int(datetime.datetime.strptime(args.end_date, '%Y-%m-%d').timestamp())
     else:
-        before_date = None
+        before_date = ''
 
-    messages, first_page_token, next_page_token = google.list_messages('me', after_date, before_date, int(args.pages_to_process), first_page_token)
+    spam = False
+    if args.spam:
+        print("Processing spam emails")
+        spam = True
+
+    messages, first_page_token, next_page_token = google.list_messages('me', after_date, before_date, int(args.pages_to_process), first_page_token, spam)
     emails = google.get_messages(messages)
 
     if len(emails) > 1:

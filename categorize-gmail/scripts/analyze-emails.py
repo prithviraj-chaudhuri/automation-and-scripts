@@ -52,14 +52,7 @@ if __name__ == '__main__':
 
     email_data = EmailData()
     email_data.read_email_data(args.data)
-    # email_data.generate_sender_report(args.data)
-
-    email_data.read_spam_list(args.data)
-    print("Potential Spam emails:")
-    print(email_data.get_potential_spam_emails())
-
-    # Send emails to spam here
-    print(email_data.get_current_spam_emails())
+    email_data.generate_sender_report(args.data)
 
 
 

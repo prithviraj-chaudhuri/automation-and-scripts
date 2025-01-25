@@ -35,13 +35,15 @@ class Google:
         except:
             print("No service")
 
-    def list_messages(self, user_id='me', after_date=None, before_date=None, pages_to_process=-1, next_page_token=None):
+    def list_messages(self, user_id='me', after_date=None, before_date=None, pages_to_process=-1, next_page_token=None, spam=False):
         print("Processing pages")
         query = ''
-        if after_date:
-            query += f'after:{after_date} '
-        if before_date:
-            query += f'before:{before_date}'
+        if after_date and after_date != '':
+            query += f'after:{after_date}'
+        if before_date and before_date != '':
+            query += f' before:{before_date}'
+        if spam:
+            query += ' is:spam'
         
         if query == '':
             query = 'is:read'
@@ -150,9 +152,3 @@ class Google:
                 results['failed'] += len(batch)
                 
         return results
-
-
-    def get_spam_emails(self, user_id='me'):
-        query = 'is:spam'
-        messages, _, _ = self.list_messages(user_id, query)
-        return messages

@@ -4,7 +4,7 @@ import datetime
 import json
 import csv
 
-from google_service import Google
+from libs.google_service import Google
 
 class Instance:
     def __init__(self, data, start_date, end_date):

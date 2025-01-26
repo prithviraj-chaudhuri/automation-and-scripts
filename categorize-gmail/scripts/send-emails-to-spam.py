@@ -19,10 +19,6 @@ if __name__ == '__main__':
     email_util.read_spam_list(args.spam_list)
     email_ids = email_util.get_message_ids_from_spam_list()
     print("Spam email count: ", len(email_ids))
-
-    email_util.read_spam_email_data(args.spam_data)
-    email_ids = email_util.get_message_ids_not_in_spam_emails(email_ids)
-    print("Final Spam email count: ", len(email_ids))
     
     google = Google(args.config)
     google.get_google_service()

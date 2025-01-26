@@ -46,11 +46,6 @@ class EmailUtil:
         print(spam_emails.head())
         return spam_emails['id'].values.tolist()
     
-    def get_message_ids_not_in_spam_emails(self, message_ids):
-        return self.emails[
-            ~self.emails['id'].isin(message_ids)
-        ]['id'].values.tolist()
-    
     def generate_sender_report(self, data_directory):
         self.sender_counts = self.sender_counts.sort_values(by='count', ascending=False)
         self.sender_counts.to_csv(data_directory+'/sender_counts.csv', index=False)

@@ -26,12 +26,8 @@ class EmailUtil:
         self.emails = self.__read_email_data(data_directory)
         print("Emails: ")
         print(self.emails.head())
+        print(self.emails.shape)
         self.sender_counts = self.emails.groupby('sender_email').size().reset_index(name='count')
-
-    def read_spam_email_data(self, data_directory):
-        self.spam_emails = self.__read_email_data(data_directory)
-        print("Spam Emails: ")
-        print(self.spam_emails.head())
     
     def read_spam_list(self, spam_list_file):
         self.spam_list = pd.read_csv(spam_list_file)
@@ -49,3 +45,11 @@ class EmailUtil:
     def generate_sender_report(self, data_directory):
         self.sender_counts = self.sender_counts.sort_values(by='count', ascending=False)
         self.sender_counts.to_csv(data_directory+'/sender_counts.csv', index=False)
+
+    def message_ids_in_emails_not_in_spam_list(self):
+        spam_emails = self.emails[
+            self.emails['sender_email'].isin(self.spam_list['sender_email'])
+        ]
+        print("Not Spam emails: ")
+        print(spam_emails.head())
+        return self.emails[~self.emails['id'].isin(spam_emails['id'])]['id'].values.tolist()

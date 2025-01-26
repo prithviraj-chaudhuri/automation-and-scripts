@@ -124,7 +124,7 @@ class Google:
             print(f"An error occurred: {error}")
             return None
 
-    def train_spam_filter(self, message_ids, batch_size=1000):
+    def train_spam_filter(self, message_ids, batch_size=1000, spam=False):
         results = {
             'marked_spam': 0,
             'trained_filter': 0,
@@ -137,12 +137,24 @@ class Google:
             print(batch)
             try:
                 # Mark as spam and train filter
-                batch_request = {
-                    'ids': batch,
-                    'addLabelIds': ['SPAM'],
-                    'removeLabelIds': ['INBOX'],
-                    'processForFilter': True
-                }
+                batch_request = None
+
+                if spam:
+                    print("Marking as spam")
+                    batch_request = {
+                        'ids': batch,
+                        'addLabelIds': ['SPAM'],
+                        'removeLabelIds': ['INBOX'],
+                        'processForFilter': True
+                    }
+                else:
+                    print("Marking as not spam")
+                    batch_request = {
+                        'ids': batch,
+                        'addLabelIds': ['INBOX'],
+                        'removeLabelIds': ['SPAM'],
+                        'processForFilter': True
+                    }
                 
                 self.service.users().messages().batchModify(
                     userId='me',

@@ -7,3 +7,6 @@ Earliest 2014-03-01
 
 
 `python send-emails-to-spam.py --config=../../config --data=./data/inbox --spam-list=./data/spam_list.csv > ./data/output/run1.log`
+
+
+`python fix-spam-emails.py --config=../../config --data=./data/inbox --spam-list=./data/spam_list.csv`

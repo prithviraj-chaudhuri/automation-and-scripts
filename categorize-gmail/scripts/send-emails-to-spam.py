@@ -10,6 +10,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", help="Path to the config files", default=os.environ.get('CONFIG'))
     parser.add_argument("--data", help="Path to the data files", default=os.environ.get('DATA'))
+    parser.add_argument("--spam-data", help="Path to the data files", default=os.environ.get('SPAM_DATA'))
     parser.add_argument("--spam-list", help="Spam list file", default=os.environ.get('SPAM_LIST'))
     args = parser.parse_args()
 
@@ -19,6 +20,10 @@ if __name__ == '__main__':
     email_ids = email_util.get_message_ids_from_spam_list()
     print("Spam email count: ", len(email_ids))
 
+    email_util.read_spam_email_data(args.spam_data)
+    email_ids = email_util.get_message_ids_not_in_spam_emails(email_ids)
+    print("Final Spam email count: ", len(email_ids))
+    
     google = Google(args.config)
     google.get_google_service()
     google.train_spam_filter(email_ids)

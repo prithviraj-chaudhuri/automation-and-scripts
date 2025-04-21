@@ -26,6 +26,7 @@
             },
             {
               "fieldLabel": "Job Description",
+              "fieldType": "textarea",
               "requiredField": true
             }
           ]
@@ -45,7 +46,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\n\nconst input_data = JSON.parse($input.first().json.data);\n\n// Extracting all skills\nlet skills = [];\nconst data_types = input_data.content.skills;\ndata_types.forEach((type) => {\n  type.list.forEach((skill) => {\n    skills.push(skill.skill)\n  });\n});\n\n// Extracting all projects\nlet projects = [];\n\nconst data_projects = input_data.content.projects;\ndata_projects.forEach((types) => {\n  types.list.forEach((project) => {\n    projects.push(project);\n  });\n});\n\nconst educational_qualification = input_data.content.educational_qualification;\neducational_qualification.forEach((education) => {\n  education.projects.forEach((project) => {\n    projects.push(project);\n  });\n});\n\nfor (const item of $input.all()) {\n  item.json.skills = skills;\n  item.json.projects = projects;\n}\n\nreturn $input.all();"
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\n\nconst input_data = JSON.parse($input.first().json.data);\n\n// Extracting all skills\nlet skills = {\n  platforms: [],\n  programming_languages: [],\n  frameworks: [],\n  other: []\n};\nconst data_types = input_data.content.skills;\ndata_types.forEach((type) => {\n  type.list.forEach((skill) => {\n    skills[skill.tag].push(skill.skill);\n  });\n});\n\n// Extracting all projects\nlet projects = [];\n\nconst data_projects = input_data.content.projects;\ndata_projects.forEach((types) => {\n  types.list.forEach((project) => {\n    projects.push(project);\n  });\n});\n\nconst educational_qualification = input_data.content.educational_qualification;\neducational_qualification.forEach((education) => {\n  education.projects.forEach((project) => {\n    projects.push(project);\n  });\n});\n\nfor (const item of $input.all()) {\n  item.json.skills = skills;\n  item.json.projects = projects;\n}\n\nreturn $input.all();"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -297,8 +298,9 @@
       "parameters": {
         "model": {
           "__rl": true,
+          "value": "gpt-4",
           "mode": "list",
-          "value": "gpt-4o-mini"
+          "cachedResultName": "gpt-4"
         },
         "options": {}
       },
@@ -320,7 +322,7 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=Here are a list of skills\n{{ $('Merge').item.json.skills }}\n\nConsider the extracted keywords from job description given below and arrange the skills in order of relevance in each of the following categories\nprogramming languages, frameworks, platforms, other skills. DO NOT MAKE UP SKILLS\n\nJob Description:\n{{ $('Extract main keywords from Job description').item.json.text }}\n\nGenerate the output in the following json format\n{\n  \"programming_languages\":[],\n  \"frameworks\":[],\n  \"platforms\":[],\n  \"other\":[]\n}",
+        "text": "=Here are a list of skills\nprogramming_languages:\n{{ $('Merge').item.json.skills.programming_languages }}\nframeworks:\n{{ $('Merge').item.json.skills.frameworks }}\nplatforms:\n{{ $('Merge').item.json.skills.platforms }}\nother:\n{{ $('Merge').item.json.skills.other }}\n\nConsider the extracted keywords from job description given below and arrange the skills in order of relevance in each of the following categories. Make sure to include all the skills. DO NOT MAKE UP SKILLS.\n\nJob Description:\n{{ $('Extract main keywords from Job description').item.json.text }}\n\nGenerate the output in the following json format\n{\n  \"programming_languages\":[],\n  \"frameworks\":[],\n  \"platforms\":[],\n  \"other\":[]\n}",
         "hasOutputParser": true,
         "messages": {
           "messageValues": [
@@ -496,11 +498,11 @@
       ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "0710fff4-8d35-4d9d-8087-e725879c5270",
+  "versionId": "84ff3af6-efeb-46d4-a0e0-9194cfb6d865",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "c1d51593aac4c786a165cf91f1ece51e7f7d51917cd907d718a787ef8561802b"

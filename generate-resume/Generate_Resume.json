@@ -9,8 +9,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        -80,
-        -320
+        -240,
+        -60
       ],
       "id": "9d58525e-1cd7-40ef-9a11-e54d9434ee84",
       "name": "Get information from GitHub"
@@ -37,7 +37,7 @@
       "typeVersion": 2.2,
       "position": [
         -460,
-        -170
+        90
       ],
       "id": "ab590191-ee18-4dde-8365-1b7e84570b16",
       "name": "On form submission",
@@ -45,13 +45,13 @@
     },
     {
       "parameters": {
-        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\n\nconst input_data = JSON.parse($input.first().json.data);\n\n// Extracting all skills\nlet skills = [];\nlet data_types = input_data.content.skills;\ndata_types.forEach((type) => {\n  type.list.forEach((skill) => {\n    skills.push(skill.skill)\n  });\n});\n\n// Extracting all projects\nlet projects = [];\nlet data_projects = input_data.content.projects;\ndata_projects.forEach((types) => {\n  types.list.forEach((project) => {\n    projects.push(project);\n  });\n});\n\n\nfor (const item of $input.all()) {\n  item.json.skills = skills;\n  item.json.projects = projects;\n}\n\nreturn $input.all();"
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\n\nconst input_data = JSON.parse($input.first().json.data);\n\n// Extracting all skills\nlet skills = [];\nconst data_types = input_data.content.skills;\ndata_types.forEach((type) => {\n  type.list.forEach((skill) => {\n    skills.push(skill.skill)\n  });\n});\n\n// Extracting all projects\nlet projects = [];\n\nconst data_projects = input_data.content.projects;\ndata_projects.forEach((types) => {\n  types.list.forEach((project) => {\n    projects.push(project);\n  });\n});\n\nconst educational_qualification = input_data.content.educational_qualification;\neducational_qualification.forEach((education) => {\n  education.projects.forEach((project) => {\n    projects.push(project);\n  });\n});\n\nfor (const item of $input.all()) {\n  item.json.skills = skills;\n  item.json.projects = projects;\n}\n\nreturn $input.all();"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        120,
-        -320
+        58,
+        -60
       ],
       "id": "7bec1862-44ff-45d6-bc21-47b35cdc458c",
       "name": "Filter out skills and projects"
@@ -73,32 +73,10 @@
       "typeVersion": 1.6,
       "position": [
         -20,
-        -20
+        240
       ],
       "id": "073990b3-f081-4c65-999a-5931ce5d70ea",
       "name": "Extract main keywords from Job description"
-    },
-    {
-      "parameters": {
-        "promptType": "define",
-        "text": "=Below is a list of skills\n{{ $json.skills.join(',') }}\n\nAnd here are a list of projects\n{{ $json.projects.join(',') }}\n\nConsider the extracted keywords from the job description given below and tell me the 4 top most projects I should add to my resume and arrange the skills in order of relevance for the job role.\n\nJob Description:\n{{ $json.text }}\n\n\nGenerate the output in the following json format\n\n{\n  \"skills\":[],\n  \"projects\":[]\n}",
-        "hasOutputParser": true,
-        "messages": {
-          "messageValues": [
-            {
-              "message": "You are an ATS agent. You take in a job description and information about the candidate (skills and projects) and find the most relevant information for the candidate with respect to this job"
-            }
-          ]
-        }
-      },
-      "type": "@n8n/n8n-nodes-langchain.chainLlm",
-      "typeVersion": 1.6,
-      "position": [
-        576,
-        -170
-      ],
-      "id": "390b9666-d10a-4210-9f3f-c6d605e8a73f",
-      "name": "Create relevant skills and projects"
     },
     {
       "parameters": {
@@ -110,25 +88,49 @@
             {
               "action": "replaceAll",
               "text": "${programming_languages}",
-              "replaceText": "python, java, php",
+              "replaceText": "={{ $('Extract relevant skills').item.json.output.programming_languages.join(',') }}",
               "matchCase": true
             },
             {
               "action": "replaceAll",
               "text": "${frameworks}",
-              "replaceText": "Spring boot, Next.js",
+              "replaceText": "={{ $('Extract relevant skills').item.json.output.frameworks.join(',') }}",
               "matchCase": true
             },
             {
               "action": "replaceAll",
               "text": "${platforms}",
-              "replaceText": "AWS, EKS, OpenShift, OpenEdx, ServiceNow, GCP",
+              "replaceText": "={{ $('Extract relevant skills').item.json.output.platforms.join(',') }}",
               "matchCase": true
             },
             {
               "action": "replaceAll",
               "text": "${other}",
-              "replaceText": "Datastores: MySQL, PostgreSQL, JCR, Helm Charts, Kubernetes, Linux, Bash, Ansible, Gitlab CI/CD pipelines, APIs, OpenStack",
+              "replaceText": "={{ $('Extract relevant skills').item.json.output.other.join(',') }}",
+              "matchCase": true
+            },
+            {
+              "action": "replaceAll",
+              "text": "${project_1}",
+              "replaceText": "={{ $('Extract relevant projects').item.json.output.projects[0] }}",
+              "matchCase": true
+            },
+            {
+              "action": "replaceAll",
+              "text": "${project_2}",
+              "replaceText": "={{ $('Extract relevant projects').item.json.output.projects[1] }}",
+              "matchCase": true
+            },
+            {
+              "action": "replaceAll",
+              "text": "${project_3}",
+              "replaceText": "={{ $('Extract relevant projects').item.json.output.projects[2] }}",
+              "matchCase": true
+            },
+            {
+              "action": "replaceAll",
+              "text": "${project_4}",
+              "replaceText": "={{ $('Extract relevant projects').item.json.output.projects[3] }}",
               "matchCase": true
             }
           ]
@@ -137,8 +139,8 @@
       "type": "n8n-nodes-base.googleDocs",
       "typeVersion": 2,
       "position": [
-        1172,
-        -170
+        1548,
+        90
       ],
       "id": "ddc163b0-6820-4352-9738-55bbebd6c20f",
       "name": "Paste text into template",
@@ -166,8 +168,8 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        952,
-        -170
+        1328,
+        90
       ],
       "id": "6513d4f5-fbbd-4596-a282-296583dd438d",
       "name": "Copy Resume template",
@@ -188,7 +190,7 @@
       "typeVersion": 3.1,
       "position": [
         356,
-        -170
+        90
       ],
       "id": "d30ae4ba-fd16-4812-86e7-c67e809ca0b9",
       "name": "Merge"
@@ -205,8 +207,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
       "position": [
-        -60,
-        200
+        68,
+        460
       ],
       "id": "3739bb49-677f-48e2-861c-92482f7a8950",
       "name": "OpenAI Chat Model",
@@ -229,8 +231,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
       "position": [
-        664,
-        50
+        604,
+        310
       ],
       "id": "83551bdb-6fa8-495f-bda8-cfc2c3d7c7d7",
       "name": "OpenAI Chat Model1",
@@ -244,16 +246,98 @@
     {
       "parameters": {
         "schemaType": "manual",
-        "inputSchema": "{\n\t\"type\": \"object\",\n\t\"properties\": {\n\t\t\"skills\": {\n\t\t\t\"type\": \"array\",\n            \"items\": {\n\t\t\t\t\"type\": \"string\"\n\t\t\t}\n\t\t},\n\t\t\"projects\": {\n\t\t\t\"type\": \"array\",\n\t\t\t\"items\": {\n\t\t\t\t\"type\": \"string\"\n\t\t\t}\n\t\t}\n\t}\n}"
+        "inputSchema": "{\n\t\"type\": \"object\",\n\t\"properties\": {\n\t\t\"projects\": {\n\t\t\t\"type\": \"array\",\n\t\t\t\"items\": {\n\t\t\t\t\"type\": \"string\"\n\t\t\t}\n\t\t}\n\t}\n}"
       },
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.2,
       "position": [
-        820,
-        60
+        724,
+        310
       ],
       "id": "cd3aa9e3-a7a0-4741-9043-1f06755fe6a8",
       "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Here are a list of projects\n{{ $json.projects.join(',') }}\n\nConsider the extracted keywords from the job description given below and tell me the 4 top most projects I should add to my resume and arrange in order of relevance for the job role. Summarize each project to a single sentence.\n\nJob Description:\n{{ $json.text }}\n\n\nGenerate the output in the following json format\n\n{\n  \"projects\":[]\n}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are an ATS agent. You take in a job description and information about the candidate and find the most relevant information for the candidate with respect to this job"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [
+        576,
+        90
+      ],
+      "id": "390b9666-d10a-4210-9f3f-c6d605e8a73f",
+      "name": "Extract relevant projects"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n\t\"type\": \"object\",\n\t\"properties\": {\n\t\t\"programming_languages\": {\n\t\t\t\"type\": \"array\",\n            \"items\": {\n\t\t\t\t\"type\": \"string\"\n\t\t\t}\n\t\t},\n        \"frameworks\": {\n\t\t\t\"type\": \"array\",\n            \"items\": {\n\t\t\t\t\"type\": \"string\"\n\t\t\t}\n        },\n        \"platforms\": {\n\t\t\t\"type\": \"array\",\n            \"items\": {\n\t\t\t\t\"type\": \"string\"\n\t\t\t}\n\t\t},\n        \"other\": {\n\t\t\t\"type\": \"array\",\n            \"items\": {\n\t\t\t\t\"type\": \"string\"\n\t\t\t}\n\t\t}\n\t}\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        1100,
+        310
+      ],
+      "id": "1a8ab318-4309-41e8-a759-7021a40f6c79",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        980,
+        310
+      ],
+      "id": "6963d677-1e38-4e10-b41a-b5fc245b54f1",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "0Ce3S8fwfOQvTqlg",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Here are a list of skills\n{{ $('Merge').item.json.skills }}\n\nConsider the extracted keywords from job description given below and arrange the skills in order of relevance in each of the following categories\nprogramming languages, frameworks, platforms, other skills. DO NOT MAKE UP SKILLS\n\nJob Description:\n{{ $('Extract main keywords from Job description').item.json.text }}\n\nGenerate the output in the following json format\n{\n  \"programming_languages\":[],\n  \"frameworks\":[],\n  \"platforms\":[],\n  \"other\":[]\n}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are an ATS agent. You take in a job description and information about the candidate and find the most relevant information for the candidate with respect to this job"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [
+        952,
+        90
+      ],
+      "id": "037f30fc-ff6e-48eb-ac32-3e6bfe76b63c",
+      "name": "Extract relevant skills"
     }
   ],
   "pinData": {},
@@ -307,17 +391,6 @@
         ]
       ]
     },
-    "Create relevant skills and projects": {
-      "main": [
-        [
-          {
-            "node": "Copy Resume template",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Copy Resume template": {
       "main": [
         [
@@ -338,7 +411,7 @@
       "main": [
         [
           {
-            "node": "Create relevant skills and projects",
+            "node": "Extract relevant projects",
             "type": "main",
             "index": 0
           }
@@ -360,7 +433,7 @@
       "ai_languageModel": [
         [
           {
-            "node": "Create relevant skills and projects",
+            "node": "Extract relevant projects",
             "type": "ai_languageModel",
             "index": 0
           }
@@ -371,8 +444,52 @@
       "ai_outputParser": [
         [
           {
-            "node": "Create relevant skills and projects",
+            "node": "Extract relevant projects",
             "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract relevant projects": {
+      "main": [
+        [
+          {
+            "node": "Extract relevant skills",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Extract relevant skills",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Extract relevant skills",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract relevant skills": {
+      "main": [
+        [
+          {
+            "node": "Copy Resume template",
+            "type": "main",
             "index": 0
           }
         ]
@@ -383,7 +500,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "ea52d745-84e3-4c6f-9baf-5a6e3ea41d93",
+  "versionId": "0710fff4-8d35-4d9d-8087-e725879c5270",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "c1d51593aac4c786a165cf91f1ece51e7f7d51917cd907d718a787ef8561802b"

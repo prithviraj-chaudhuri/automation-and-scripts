@@ -162,3 +162,5 @@ cython_debug/
 config
 data
 .DS_Store
+
+uploads
